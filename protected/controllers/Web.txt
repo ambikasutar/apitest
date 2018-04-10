@@ -1,0 +1,54 @@
+
+ <?php
+ 
+ class WebServicesController extends CController
+ {
+     public $defaultAction='demo';
+     /**
+      * Declares class-based actions.
+      */
+     public function actions()
+     {
+         return array(
+             'demo'=>array(
+             'class'=>'CWebServiceAction')
+             
+         );
+     }
+ 
+ 
+ /**
+  * This action serves as a test SOAP client to verify our Web service
+  * login method.
+  */
+ public function actionTestLogin()
+ {
+   //use the Yii application to build the proper request url format
+   $wsdlUrl=Yii::app()->request->hostInfo.$this->createUrl('demo');
+ 
+   //create the php soap client passing in a parameter to instruct
+   //it not to cache the wsdl for testing purposes
+   $client=new SoapClient($wsdlUrl, array('cache_wsdl' => 0));                             
+ 
+   echo "<pre>";
+   echo "login...\n";
+   if($client->login('admin','admin')) echo "Successful Login!";
+   else echo "Sorry, the username and/or password supplied is invalid.";
+   echo "</pre>";
+ }
+ 
+ 
+ /**
+  * @param string username
+  * @param string password         
+  * @return boolean whether login is valid    
+  * @soap
+  */
+ public function login($username,$password)
+ {
+     $identity=new UserIdentity($username,$password);
+     if($identity->authenticate())
+         Yii::app()->user->login($identity);
+     return $identity->isAuthenticated;  
+ }
+ } 
